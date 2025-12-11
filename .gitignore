@@ -1,0 +1,48 @@
+# Client
+node_modules
+dist
+dist-ssr
+*.local
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+
+# Server
+bin/
+obj/
+*.db
+*.db-shm
+*.db-wal
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+
+# OS files
+.DS_Store
+Thumbs.db
+
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+appsettings.Production.json
