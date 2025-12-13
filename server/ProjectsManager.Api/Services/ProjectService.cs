@@ -13,8 +13,7 @@ public class ProjectService(AppDbContext context) : IProjectService
         var projects = await context.Projects
             .Where(p => p.UserId == userId)
             .Include(p => p.Tasks)
-            .ToListAsync();
-        
+            .ToListAsync(); 
         return projects.Select(MapToDto).ToList();
     }
     
@@ -24,10 +23,7 @@ public class ProjectService(AppDbContext context) : IProjectService
             .Where(p => p.Id == projectId && p.UserId == userId)
             .Include(p => p.Tasks)
             .FirstOrDefaultAsync();
-        
-        if (project is null)
-            return null;
-        
+        if (project is null) return null;
         return MapToDto(project);
     }
     
@@ -42,21 +38,17 @@ public class ProjectService(AppDbContext context) : IProjectService
         
         context.Projects.Add(project);
         await context.SaveChangesAsync();
-        
         return MapToDto(project);
     }
     
     public async Task<bool> DeleteProjectAsync(string projectId, string userId)
     {
-        var project = await context.Projects
-            .FirstOrDefaultAsync(p => p.Id == projectId && p.UserId == userId);
+        var project = await context.Projects.FirstOrDefaultAsync(p => p.Id == projectId && p.UserId == userId);
         
-        if (project is null)
-            return false;
+        if (project is null) return false;
         
         context.Projects.Remove(project);
         await context.SaveChangesAsync();
-        
         return true;
     }
     
@@ -64,9 +56,7 @@ public class ProjectService(AppDbContext context) : IProjectService
     {
         var totalTasks = project.Tasks.Count;
         var completedTasks = project.Tasks.Count(t => t.IsCompleted);
-        var progressPercentage = totalTasks > 0 
-            ? Math.Round((double)completedTasks / totalTasks * 100, 1) 
-            : 0;
+        var progressPercentage = totalTasks > 0 ? Math.Round((double)completedTasks / totalTasks * 100, 1) : 0;
         
         return new ProjectDto
         {

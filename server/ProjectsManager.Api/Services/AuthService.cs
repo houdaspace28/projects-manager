@@ -14,12 +14,9 @@ public class AuthService(AppDbContext context, IConfiguration configuration) : I
     public async Task<AuthResponseDto?> RegisterAsync(RegisterRequestDto request)
     {
         
-        var existingUser = await context.Users
-            .FirstOrDefaultAsync(u => u.Email == request.Email);
+        var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
         
-        if (existingUser is not null)
-            return null; 
-        
+        if (existingUser is not null) return null; 
         
         var user = new User
         {
@@ -29,8 +26,7 @@ public class AuthService(AppDbContext context, IConfiguration configuration) : I
         
         context.Users.Add(user);
         await context.SaveChangesAsync();
-        
-        
+    
         var token = GenerateJwtToken(user);
         
         return new AuthResponseDto
@@ -43,17 +39,13 @@ public class AuthService(AppDbContext context, IConfiguration configuration) : I
     
     public async Task<AuthResponseDto?> LoginAsync(LoginRequestDto request)
     {
-        // Find user by email
-        var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Email == request.Email);
+        // find user by email
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
         
-        if (user is null)
-            return null; 
+        if (user is null) return null; 
         
         
-        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            return null; 
-        
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash)) return null; 
         
         var token = GenerateJwtToken(user);
         
@@ -67,8 +59,7 @@ public class AuthService(AppDbContext context, IConfiguration configuration) : I
     
     private string GenerateJwtToken(User user)
     {
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!));
         
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         
