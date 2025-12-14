@@ -12,10 +12,10 @@ namespace ProjectsManager.Api.Controllers;
 public class TasksController(ITaskService taskService) : ControllerBase
 {
     [HttpGet("projects/{projectId}/tasks")]
-    public async Task<IActionResult> GetProjectTasks(string projectId)
+    public async Task<IActionResult> GetProjectTasks(string projectId, [FromQuery] string? status = null, [FromQuery] string? search = null)
     {
         var userId = GetUserId();
-        var tasks = await taskService.GetProjectTasksAsync(projectId, userId);
+        var tasks = await taskService.GetProjectTasksAsync(projectId, userId, status, search);
         return Ok(tasks);
     }
 

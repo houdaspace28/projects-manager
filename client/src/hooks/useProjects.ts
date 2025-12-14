@@ -19,7 +19,6 @@ export function useProject(id: string) {
 
 export function useCreateProject() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (data: CreateProjectRequest) => projectService.create(data),
     onSuccess: () => {
@@ -30,7 +29,6 @@ export function useCreateProject() {
 
 export function useDeleteProject() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (id: string) => projectService.delete(id),
     onSuccess: () => {

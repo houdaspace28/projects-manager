@@ -8,18 +8,22 @@ using ProjectsManager.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// adding cors
+// add cors
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+            "http://localhost:5173",  // vite dev server
+            "http://localhost:3000",  // docker frontend
+            "http://frontend:80"      // docker internal
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
-// adding AppDbContext
+// adding DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -52,6 +56,13 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// auto-migration
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -59,9 +70,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();

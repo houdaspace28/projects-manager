@@ -27,22 +27,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// handling errors globally
-api.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError<{ message?: string }>) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("email");
-      localStorage.removeItem("userId");
-      window.location.href = "/login";
-      return Promise.reject(new Error("Session expired. Please login again."));
-    }
-
-    const message =error.response?.data?.message || error.response?.statusText || error.message || "An unexpected error occurred";
-    return Promise.reject(new Error(message));
-  }
-);
 
 // Auth
 export const authService = {
@@ -54,7 +38,7 @@ export const authService = {
   register: async (data: RegisterRequest): Promise<User> => {
     const response = await api.post("/auth/register", data);
     return response.data;
-  }
+  },
 };
 
 // Projects
@@ -76,13 +60,27 @@ export const projectService = {
 
   delete: async (id: string): Promise<void> => {
     await api.delete(`/projects/${id}`);
-  }
+  },
 };
 
 // Tasks
+export interface TaskFilters {
+  status?: "all" | "completed" | "pending";
+  search?: string;
+}
+
 export const taskService = {
-  getByProject: async (projectId: string): Promise<Task[]> => {
-    const response = await api.get(`/projects/${projectId}/tasks`);
+  getByProject: async (projectId: string, filters?: TaskFilters): Promise<Task[]> => {
+    const params = new URLSearchParams();
+    if (filters?.status && filters.status !== "all") {
+      params.append("status", filters.status);
+    }
+    if (filters?.search) {
+      params.append("search", filters.search);
+    }
+    const queryString = params.toString();
+    const url = `/projects/${projectId}/tasks${queryString ? `?${queryString}` : ""}`;
+    const response = await api.get(url);
     return response.data;
   },
 
@@ -98,5 +96,5 @@ export const taskService = {
 
   delete: async (taskId: string): Promise<void> => {
     await api.delete(`/tasks/${taskId}`);
-  }
+  },
 };

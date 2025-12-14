@@ -7,17 +7,36 @@ namespace ProjectsManager.Api.Services;
 
 public class TaskService(AppDbContext context) : ITaskService
 {
-    public async Task<List<TaskDto>> GetProjectTasksAsync(string projectId, string userId)
+    
+    public async Task<List<TaskDto>> GetProjectTasksAsync(string projectId, string userId, string? status = null, string? search = null)
     {
         var project = await context.Projects.FirstOrDefaultAsync(p => p.Id == projectId && p.UserId == userId);
 
         if (project is null) return [];
 
-        var tasks = await context.Tasks.Where(t => t.ProjectId == projectId).ToListAsync();
+        var query = context.Tasks.Where(t => t.ProjectId == projectId);
+        if (!string.IsNullOrEmpty(status))
+        {
+            query = status.ToLower() switch
+            {
+                "completed" => query.Where(t => t.IsCompleted),
+                "pending" => query.Where(t => !t.IsCompleted),
+                _ => query 
+            };
+        }
+        if (!string.IsNullOrEmpty(search))
+        {
+            var searchLower = search.ToLower();
+            query = query.Where(t => 
+                t.Title.ToLower().Contains(searchLower) || 
+                (t.Description != null && t.Description.ToLower().Contains(searchLower))
+            );
+        }
 
+        var tasks = await query.OrderByDescending(t => t.CreatedAt).ToListAsync();
         return tasks.Select(MapToDto).ToList();
     }
-
+    
     public async Task<TaskDto?> CreateTaskAsync(string projectId, CreateTaskDto request, string userId)
     {
         var project = await context.Projects.FirstOrDefaultAsync(p => p.Id == projectId && p.UserId == userId);

@@ -1,18 +1,18 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { taskService } from "../api";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { taskService, type TaskFilters } from "../api";
 import type { CreateTaskRequest } from "../types";
 
-export function useTasks(projectId: string) {
+export function useTasks(projectId: string, filters?: TaskFilters) {
   return useQuery({
-    queryKey: ["tasks", projectId],
-    queryFn: () => taskService.getByProject(projectId),
+    queryKey: ["tasks", projectId, filters],
+    queryFn: () => taskService.getByProject(projectId, filters),
     enabled: !!projectId,
+    placeholderData: keepPreviousData
   });
 }
 
 export function useCreateTask(projectId: string) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (data: CreateTaskRequest) => taskService.create(projectId, data),
     onSuccess: () => {
@@ -23,11 +23,10 @@ export function useCreateTask(projectId: string) {
   });
 }
 
-export function useCompleteTask(projectId: string) {
+export function useToggleTask(projectId: string) {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (taskId: string) => taskService.complete(taskId),
+    mutationFn: (taskId: string) => taskService.toggle(taskId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
       queryClient.invalidateQueries({ queryKey: ["projects", projectId] });
@@ -38,7 +37,6 @@ export function useCompleteTask(projectId: string) {
 
 export function useDeleteTask(projectId: string) {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (taskId: string) => taskService.delete(taskId),
     onSuccess: () => {
