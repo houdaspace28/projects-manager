@@ -28,6 +28,7 @@ export default function ProjectDetailPage() {
     search: "",
   });
 
+  // debouncing
   useEffect(() => {
     const timer = setTimeout(() => {
       setFilters(prev => ({ ...prev, search: searchInput }));
@@ -42,7 +43,7 @@ export default function ProjectDetailPage() {
   const deleteTask = useDeleteTask(id!);
   const deleteProject = useDeleteProject();
 
-  const {register,handleSubmit,formState: { errors },reset,} = useForm<CreateTaskFormData>();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<CreateTaskFormData>();
 
   const onSubmit = async (data: CreateTaskFormData) => {
     try {
@@ -53,7 +54,7 @@ export default function ProjectDetailPage() {
       });
       closeModal();
     } catch {
-      //error handled by tanstack query
+      // error handled by tanstack query
     }
   };
 
@@ -61,7 +62,7 @@ export default function ProjectDetailPage() {
     try {
       await toggleTask.mutateAsync(taskId);
     } catch {
-      //error handled by tanstack query
+      // error handled by tanstack query
     }
   };
 
@@ -85,11 +86,13 @@ export default function ProjectDetailPage() {
         setDeleteTarget(null);
       }
     } catch {
-      //error handled by tanstack query
+     // error handled by tanstack query
     }
   };
 
-  const handleDeleteCancel = () => { setDeleteTarget(null);};
+  const handleDeleteCancel = () => {
+    setDeleteTarget(null);
+  };
 
   const openModal = () => setShowModal(true);
 
@@ -101,7 +104,7 @@ export default function ProjectDetailPage() {
   const isLoading = projectLoading || tasksLoading;
   const isDeleting = deleteProject.isPending || deleteTask.isPending;
 
-  if (isLoading) {
+  if (isLoading && !tasks.length) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
@@ -139,7 +142,6 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
@@ -153,9 +155,8 @@ export default function ProjectDetailPage() {
         </div>
       </header>
 
-      
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+       
         <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex items-start gap-4">
@@ -179,7 +180,7 @@ export default function ProjectDetailPage() {
             </button>
           </div>
 
-        
+         
           <div className="mt-6 pt-6 border-t border-slate-100">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-slate-700">Overall Progress</span>
@@ -195,11 +196,7 @@ export default function ProjectDetailPage() {
             </div>
             <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  project.progress.progressPercentage === 100
-                    ? "bg-green-500"
-                    : "bg-slate-900"
-                }`}
+                className={`h-full rounded-full transition-all duration-500 ${project.progress.progressPercentage === 100 ? "bg-green-500" : "bg-slate-900"}`}
                 style={{ width: `${project.progress.progressPercentage}%` }}
               />
             </div>
@@ -209,12 +206,10 @@ export default function ProjectDetailPage() {
           </div>
         </div>
 
+        
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h2 className="text-lg font-semibold text-slate-900">Tasks</h2>
-          <button
-            onClick={openModal}
-            className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 transition-colors"
-          >
+          <button onClick={openModal} className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
@@ -225,7 +220,7 @@ export default function ProjectDetailPage() {
         
         <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
-      
+           
             <div className="flex-1">
               <div className="relative">
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -234,8 +229,8 @@ export default function ProjectDetailPage() {
                 <input
                   type="text"
                   placeholder="Search tasks..."
-                  value={filters.search || ""}
-                  onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-shadow"
                 />
               </div>
@@ -244,8 +239,10 @@ export default function ProjectDetailPage() {
            
             <div className="flex gap-2">
               {(["all", "pending", "completed"] as const).map((status) => (
-                <button key={status} onClick={() => setFilters(prev => ({ ...prev, status }))} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors 
-                  ${
+                <button
+                  key={status}
+                  onClick={() => setFilters(prev => ({ ...prev, status }))}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     filters.status === status
                       ? "bg-slate-900 text-white"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -267,14 +264,14 @@ export default function ProjectDetailPage() {
               </svg>
             </div>
             <h3 className="text-lg font-medium text-slate-900">
-              {filters.search || filters.status !== "all" ? "No tasks found" : "No tasks yet"}
+              {searchInput || filters.status !== "all" ? "No tasks found" : "No tasks yet"}
             </h3>
             <p className="text-slate-500 mt-1 mb-6">
-              {filters.search || filters.status !== "all" 
-                ? "Try adjusting your filters" 
+              {searchInput || filters.status !== "all"
+                ? "Try adjusting your filters"
                 : "Add your first task to get started."}
             </p>
-            {!filters.search && filters.status === "all" && (
+            {!searchInput && filters.status === "all" && (
               <button onClick={openModal} className="inline-flex items-center gap-2 text-sm font-medium text-slate-900 hover:text-slate-700">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -338,10 +335,10 @@ export default function ProjectDetailPage() {
         )}
       </main>
 
-
+     
       {showModal && (
         <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={closeModal}/>
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={closeModal} />
           <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg p-4">
             <div className="bg-white rounded-xl border border-slate-200 shadow-xl">
               <div className="p-6 border-b border-slate-100">
@@ -351,11 +348,11 @@ export default function ProjectDetailPage() {
 
               <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
                 {createTask.isError && (
-                  <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg text-sm">
-                    <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="flex items-start gap-2 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg text-sm">
+                    <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
-                    Failed to create task
+                    <span>{createTask.error instanceof Error ? createTask.error.message : "Failed to create task"}</span>
                   </div>
                 )}
 
@@ -396,15 +393,16 @@ export default function ProjectDetailPage() {
                   <label className="block text-sm font-medium text-slate-700">
                     Due Date <span className="text-slate-400 font-normal">(optional)</span>
                   </label>
-                  <input
-                    type="date"
-                    {...register("dueDate")}
-                    className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-shadow"
+                  <input type="date" {...register("dueDate")} className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-shadow"
                   />
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-4">
-                  <button type="button" onClick={closeModal} className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 transition-colors">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 transition-colors"
+                  >
                     Cancel
                   </button>
                   <button
@@ -431,7 +429,7 @@ export default function ProjectDetailPage() {
         </div>
       )}
 
-      
+
       <ConfirmModal
         isOpen={!!deleteTarget}
         title={deleteTarget?.type === "project" ? "Delete Project" : "Delete Task"}
