@@ -9,7 +9,7 @@ A full-stack task management application that allows users to create projects, a
 
 ## Demo Video
 
-[Watch the Demo Video](https://drive.google.com/file/d/1qRsLpIuH8x4BLmrfzQFTcE4GtDQZvOp6/view?usp=sharing)
+[Watch the Demo Video](https://drive.google.com/file/d/1qRsLpIuH8x4BLmrfzQFTcE4GtDQZvOp6/view?usp=sharing)  (https://drive.google.com/file/d/1qRsLpIuH8x4BLmrfzQFTcE4GtDQZvOp6/view)
 
 ## Tech Stack
 
